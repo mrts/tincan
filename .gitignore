@@ -1,0 +1,6 @@
+*.a
+*.swp
+*.o
+lib/
+obj/
+test/obj/

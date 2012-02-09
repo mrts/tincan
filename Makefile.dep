@@ -1,0 +1,3 @@
+obj/Field.o: src/Field.cpp src/../include/Field.h
+obj/foo.o: src/foo.cpp
+obj/test.o: src/test.cpp
