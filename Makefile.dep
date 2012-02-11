@@ -1,2 +1,4 @@
-obj/DbObject.o: src/DbObject.cpp src/../include/DbObject.h \
- src/../include/release_assert.h
+obj/DbObject.o: src/DbObject.cpp include/tincan/DbObject.h \
+  include/tincan/PreparedStatement.h include/tincan/exceptions.h \
+  include/tincan/declarations.h include/tincan/disable_copy.h \
+  include/tincan/Field.h include/tincan/release_assert.h

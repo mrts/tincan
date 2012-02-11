@@ -8,11 +8,11 @@ TARGET   = lib/lib$(LIBNAME).a
 
 DEBUG    =
 
-CXX      = g++
+CXX      = clang++
 CXXFLAGS = -pipe -O2 $(DEBUG) -fPIC -Wall -Wextra -Werror -D_REENTRANT
 INCPATH  = -Iinclude
 
-LINK     = g++
+LINK     = clang++
 LFLAGS   = -Wl,-O1
 LIBS     = -Llib -l$(LIBNAME)
 
@@ -55,6 +55,6 @@ clean:
 # Automatic dependency handling
 
 dep: $(SRC) $(TESTSRC)
-	$(CXX) -MM $(SRC) | sed 's%^\([[:alpha:]]\)%obj/\1%' > $(DEP)
+	$(CXX) $(INCPATH) -MM $(SRC) | sed 's%^\([[:alpha:]]\)%obj/\1%' > $(DEP)
 
 include $(DEP)

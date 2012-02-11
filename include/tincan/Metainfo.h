@@ -3,6 +3,8 @@
 
 #include <string>
 
+#include "disable_copy.h"
+
 namespace tincan
 {
 
@@ -14,6 +16,8 @@ struct Metainfo
     Metainfo() :
         label(l)
     {}
+private:
+    DISABLE_COPY(Metainfo)
 };
 
 }

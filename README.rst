@@ -1,17 +1,17 @@
 tincan: a C++ data mapper
 =========================
 
-At the core of ``tincan`` is a generic framework for mapping objects to other
-data formats.
+At the core of ``tincan`` is a simple generic framework of fields and metadata
+for mapping objects to other data formats.
 
 On top of that, ``tincan`` provides:
 
-* SQL aspect: a simple ORM for SQLite databases.
+* the SQL aspect: a simple ORM for SQLite databases.
 
-* XML aspect: serialization to/from XML.
+* the XML aspect: serialization to/from XML.
 
-``tincan`` is `licenced`_ under the new BSD licence - feel free to use it
-commercially.
+``tincan`` is `licenced`_ under the new BSD licence - feel free to modify and
+use it commercially.
 
 Quick overview::
 
@@ -22,22 +22,22 @@ Quick overview::
  std::cout << ervin->age.label  << ": " << ervin->age << std::endl;
  // -> output: name: Ervin, age: 38
 
- // DbObject-specifi aspect: SQL statement building
+ // DbObject-specific aspect: SQL statement building
  std::cout << ervin.createTableStatement() << std::endl;
  // -> output: CREATE TABLE person (id INTEGER PRIMARY KEY AUTOINCREMENT,name TEXT,age INT);
 
- // DbObject-specifi aspect: store object in database
+ // DbObject-specific aspect: store object in database
  ervin.save();
 
  tincan::DbObject<Person> jill;
 
- // DbObject-specifi aspect: load object from database by field
+ // DbObject-specific aspect: load object from database by field
  jill.load(jill->name, "Jill");
 
  // wrap the same object with XML decorator
  tincan::XmlObject<Person> xjill(jill);
 
- // XmlObject-specifi aspect: serialize to XML
+ // XmlObject-specific aspect: serialize to XML
  std::cout << xjill.toXml() << std::endl;
 
 See `main test`_ for more details.
