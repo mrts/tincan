@@ -1,16 +1,16 @@
 tincan: a C++ data mapper
 =========================
 
-At the core of `tincan` is a generic framework for mapping objects to other
+At the core of ``tincan`` is a generic framework for mapping objects to other
 data formats.
 
-On top of that, `tincan` provides:
+On top of that, ``tincan`` provides:
 
- * SQL aspect: a simple ORM for SQLite databases.
+* SQL aspect: a simple ORM for SQLite databases.
 
- * XML aspect: serialization to/from XML.
+* XML aspect: serialization to/from XML.
 
-`tincan` is `licenced`_ under the new BSD licence -- feel free to use it
+``tincan`` is `licenced`_ under the new BSD licence - feel free to use it
 commercially.
 
 Quick overview::

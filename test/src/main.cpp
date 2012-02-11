@@ -16,7 +16,7 @@ struct Person
     //  combined constraints - unique together etc
     //  in some far future - inheritance
     static const char PERSON[];
-    tincan::Metainfo<PERSON> metainfo;
+    static tincan::Metainfo<PERSON> metainfo;
 
     // TODO:
     //  constraints  - tincan::Field::Unique
@@ -45,11 +45,12 @@ struct Person
     }
 };
 
-// class and field names
+// metainfo definition
+template<> tincan::Metainfo<Person::PERSON> Person::metainfo;
+// field names definitions
 const char Person::PERSON[] = "person";
 const char Person::NAME[] = "name";
 const char Person::AGE[] = "age";
-
 
 int main()
 {
