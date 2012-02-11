@@ -4,65 +4,72 @@
 #include <vector>
 #include <iostream>
 
-class Person
+struct Person
 {
-public:
     Person(const std::string& n, int a) :
         name(n),
-        age(a),
-        address()
+        age(a)
     {}
 
-    // public fields
-    std::string name;
-    int age;
-    std::vector<std::string> address;
+    // TODO:
+    //  namespaces  - tincan::Namespace<TRIP>
+    //  combined constraints - unique together etc
+    //  in some far future - inheritance
+    static const char PERSON[];
+    tincan::Metainfo<PERSON> metainfo;
 
-    // accessor methods for generic visitors
+    // TODO:
+    //  constraints  - tincan::Field::Unique
+    //  foreing keys - tincan::Field::ForeignKey<OtherClass>
+    //  etc
+    static const char NAME[];
+    tincan::Field<std::string, NAME> name;
+
+    static const char AGE[];
+    tincan::Field<int, AGE> age;
+
+    /** Let generic visitors read fields. */
     template <class Visitor>
-    void accessFields(Visitor& v)
+    void acceptRead(Visitor& v)
     {
-        v
-        << tincan::Field<std::string>("name", name)
-        << tincan::Field<int>("age", age);
-        // will support:
-        //  constraints  - tincan::Field::Unique
-        //  foreing keys - tincan::Field::ForeignKey<OtherClass>
-        //  etc
+        v << name;
+        v << age;
     }
 
+    /** Let generic visitors write fields. */
     template <class Visitor>
-    void accessMetainfo(Visitor& v)
+    void acceptWrite(Visitor& v)
     {
-        // v << tincan::Table("Person");
+        v >> name;
+        v >> age;
     }
 };
+
+// class and field names
+const char Person::PERSON[] = "person";
+const char Person::NAME[] = "name";
+const char Person::AGE[] = "age";
 
 
 int main()
 {
-    // Need to take ownership of the object, so using scoped pointers and
-    // heap objects. Would *love* to use && instead.
-    // Perhaps make ownership explicit with auto_ptr?
-    tincan::DataObject<Person> p(new Person("Mart", 38));
-    std::cout << p.object->name;
+    tincan::DbObject<Person> ervin(new Person("Ervin", 38));
 
-    Person& p2 = *p.object;
-    std::cout << " " << p2.age << std::endl;
+    // fields provide metadata for and proxy the underlying type
+    std::cout << ervin->name.label << ": " << ervin->name << ", ";
+    std::cout << ervin->age.label  << ": " << ervin->age << std::endl;
 
-    std::cout << p.createTable() << std::endl;
+    ervin->age = 39;
+    std::cout << ervin->age.label  << ": " << ervin->age << std::endl;
 
-    p.save();
+    // DbObject-specifi aspect: SQL statement building
+    std::cout << ervin.createTableStatement() << std::endl;
+
+    // DbObject-specifi aspect: store object in database
+    // ervin.save();
 
     /*
-    p.object->m_name = "Kalle";
-    p.object->m_age = 27;
-    p.save();
-
-    p.load("name", "Mart");
-    std::cout << p.object.m_age << std::endl;
-
-    p.load(tincan::Query::StartsWith("name", "A") &
+    p.load(tincan::Query::StartsWith(p->name, "A") &
             tincan::Query::Equals("age", 30));
     std::cout << p.object.m_age << std::endl;
     */

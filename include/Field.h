@@ -2,28 +2,51 @@
 #define FIELD_H__
 
 #include <string>
+#include <iostream>
 
 namespace tincan
 {
 
-template<typename T>
-class Field
+/**
+ * Field is a descriptor that provides metadata (like label, type, constraints
+ * etc) for an underlying POD type.
+ *
+ * It functions as proxy for the underlying object via assignment and cast
+ * operators.
+ */
+template <typename T, const char* l>
+struct Field
 {
-public:
-    Field(const std::string& name, const T& value) :
-        _name(name), _value(value)
+    typedef T type;
+    std::string label;
+
+    Field(const T& value) :
+        label(l),
+        _value(value)
     {}
 
-    const std::string& type() const;
+    operator T& () { return _value; }
+    operator const T& () const { return _value; }
 
-    std::string sqlDeclaration() const
+    T& operator = (const T& rhs) {
+        _value = rhs;
+        return _value;
+    }
+
+    friend std::ostream& operator << (std::ostream& out, const Field<T, l>& f)
     {
-        return _name + " " + type();
+        out << f._value;
+        return out;
+    }
+
+    friend std::istream& operator >> (std::istream& in, Field<T, l>& f)
+    {
+        in >> f._value;
+        return in;
     }
 
 private:
-    std::string _name;
-    const T& _value;
+    T _value;
 };
 
 }

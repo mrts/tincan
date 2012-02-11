@@ -6,8 +6,10 @@ TEST     = tincan-test
 
 TARGET   = lib/lib$(LIBNAME).a
 
+DEBUG    =
+
 CXX      = g++
-CXXFLAGS = -pipe -O2 -fPIC -Wall -Wextra -Werror -D_REENTRANT
+CXXFLAGS = -pipe -O2 $(DEBUG) -fPIC -Wall -Wextra -Werror -D_REENTRANT
 INCPATH  = -Iinclude
 
 LINK     = g++

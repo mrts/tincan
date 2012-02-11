@@ -1,3 +1,2 @@
-obj/Field.o: src/Field.cpp src/../include/Field.h
-obj/foo.o: src/foo.cpp
-obj/test.o: src/test.cpp
+obj/DbObject.o: src/DbObject.cpp src/../include/DbObject.h \
+ src/../include/release_assert.h
