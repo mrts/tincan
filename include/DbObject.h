@@ -1,8 +1,14 @@
 #ifndef DATAOBJECT_H__
 #define DATAOBJECT_H__
 
-// FIXME: #ifdef USE_BOOST, else use C++11 std::shared_ptr
-#include <boost/smart_ptr/shared_ptr.hpp>
+// don't depend on boost when using C++11
+#if defined(__GXX_EXPERIMENTAL_CXX0X__) || (__cplusplus > 199711L)
+  #include <memory>
+  #pragma message "Using std::shared_ptr"
+#else
+  #include <boost/smart_ptr/shared_ptr.hpp>
+  #pragma message "Using boost::shared_ptr"
+#endif
 
 #include <string>
 #include <sstream>
@@ -37,7 +43,11 @@ template <class UnderlyingObject>
 class DbObject
 {
 public:
+#if defined(__GXX_EXPERIMENTAL_CXX0X__) || (__cplusplus > 199711L)
+    typedef std::shared_ptr<UnderlyingObject>   object_type;
+#else
     typedef boost::shared_ptr<UnderlyingObject> object_type;
+#endif
 
     object_type object;
 

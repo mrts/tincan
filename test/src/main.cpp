@@ -68,11 +68,5 @@ int main()
     // DbObject-specifi aspect: store object in database
     // ervin.save();
 
-    /*
-    p.load(tincan::Query::StartsWith(p->name, "A") &
-            tincan::Query::Equals("age", 30));
-    std::cout << p.object.m_age << std::endl;
-    */
-
     return 0;
 }
