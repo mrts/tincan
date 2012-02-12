@@ -5,10 +5,9 @@
 namespace tincan
 {
 
-//TODO: these declarations are SQLite-specific, refactor if other backends
-// required
+// TODO: SQL is SQLite-specific, refactor if other backends required
 
-// FIXME: most options have no effect currently
+// FIXME: options have no effect currently
 
 template <typename T>
 const std::string& DbFieldType(int)
@@ -31,15 +30,9 @@ const std::string& DbFieldType<std::string>(int fieldOptions)
 template <>
 const std::string& DbFieldType<int>(int fieldOptions)
 {
-    static std::string ret;
+    RELEASE_ASSERT(!fieldOptions, "Options haven't been implemented yet");
 
-    if (fieldOptions == FieldOptions::PrimaryKey)
-        ret = "INTEGER PRIMARY KEY AUTOINCREMENT";
-    else if (fieldOptions)
-        RELEASE_ASSERT(false, "Only primary key implemented currently");
-    else
-        ret = "INT";
-
+    static std::string ret("INT");
     return ret;
 }
 

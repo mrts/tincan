@@ -95,10 +95,13 @@ public:
 
     operator bool () const { return object; }
 
+    // TODO: SQL is SQLite-specific, refactor if other backends required
     std::string createTableStatement() const
     {
         std::ostringstream sql;
         sql << "CREATE TABLE " << object->metainfo.label << " (";
+        sql << object->id.label
+            << " INTEGER PRIMARY KEY AUTOINCREMENT,";
 
         DbFieldDeclarationBuilder fb(sql);
         object->acceptRead(fb);

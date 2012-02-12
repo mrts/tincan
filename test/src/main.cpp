@@ -21,6 +21,10 @@ struct Person
     static tincan::Metainfo<PERSON_CLASS> metainfo;
 
     static const char ID_FIELD[];
+    /** id is a special "primary key" field that must be present for the db
+     * ascpect. (You get a compile error when using DbObject if it is not.)
+     * It shouldn't be passed to visitors as it is accessed directly.
+     */
     tincan::Field<int, ID_FIELD, tincan::FieldOptions::PrimaryKey> id;
 
     static const char NAME_FIELD[];
@@ -33,7 +37,6 @@ struct Person
     template <class Visitor>
     void acceptRead(Visitor& v)
     {
-        v << id;
         v << name;
         v << age;
     }
@@ -42,7 +45,6 @@ struct Person
     template <class Visitor>
     void acceptWrite(Visitor& v)
     {
-        v >> id;
         v >> name;
         v >> age;
     }
