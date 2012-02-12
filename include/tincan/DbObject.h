@@ -1,9 +1,8 @@
 #ifndef DATAOBJECT_H__
 #define DATAOBJECT_H__
 
-#include "PreparedStatement.h"
-
-#include "disable_copy.h"
+#include "db/FieldVisitors.h"
+#include "db/PreparedStatement.h"
 
 // don't depend on boost when using C++11
 #if defined(__GXX_EXPERIMENTAL_CXX0X__) || (__cplusplus > 199711L)
@@ -18,53 +17,6 @@
 namespace tincan
 {
 
-template <typename T>
-const std::string& DbFieldType(int fieldOptions);
-
-class DbFieldDeclarationBuilder
-{
-public:
-    DbFieldDeclarationBuilder(std::ostringstream& out) :
-        _out(out)
-    {}
-
-    template <class TypedField>
-    void operator<< (const TypedField& field)
-    {
-        _out << field.label
-            << " "
-            << DbFieldType<typename TypedField::type>(field.options)
-            << ",";
-    }
-
-private:
-    DISABLE_COPY(DbFieldDeclarationBuilder)
-
-    std::ostringstream& _out;
-};
-
-class DbFieldBinder
-{
-public:
-    DbFieldBinder(PreparedStatement::ptr& statement) :
-        _statement(statement),
-        _counter(1)
-    {}
-
-    template <class TypedField>
-    void operator<< (const TypedField& field)
-    {
-        _statement->bind<typename TypedField::type>(_counter, field.value());
-        _counter++;
-    }
-
-private:
-    DISABLE_COPY(DbFieldBinder)
-
-    PreparedStatement::ptr& _statement;
-    unsigned int _counter;
-};
-
 template <class UnderlyingObject>
 class DbObject
 {
@@ -77,25 +29,25 @@ public:
 
     object_ptr object;
 
-    DbObject(const object_ptr& obj) :
-        object(obj),
-        _save_statement(),
-        _load_statement()
-    {}
-
     DbObject(UnderlyingObject* obj) :
         object(obj),
-        _save_statement(),
+        _insert_statement(),
+        _update_statement(),
         _load_statement()
     {}
 
     const object_ptr& operator -> () const { return object; }
 
+    // TODO: excellent oportunity for dirty status tracking:
+    // don't allow modification of fields directly but use
+    // .modify()-> ... instead. modify() would return normal reference.
     object_ptr& operator -> () { return object; }
 
     operator bool () const { return object; }
 
+    // SQL statements
     // TODO: SQL is SQLite-specific, refactor if other backends required
+
     std::string createTableStatement() const
     {
         std::ostringstream sql;
@@ -106,54 +58,120 @@ public:
         DbFieldDeclarationBuilder fb(sql);
         object->acceptRead(fb);
 
-        std::string ret = sql.str();
-        ret.erase(ret.end() - 1); // remove last comma
+        long pos = sql.tellp();
+        sql.seekp(pos - 1); // remove last comma
 
-        return ret + ");";
+        sql << ");";
+
+        return sql.str();
+    }
+
+    std::string insertStatement() const
+    {
+        std::ostringstream sql;
+        sql << "INSERT INTO " << object->metainfo.label << " ";
+
+        std::ostringstream columnLabels;
+        std::ostringstream fieldPlaceholders;
+
+        DbInsertQueryFieldBuilder iqfb(columnLabels, fieldPlaceholders);
+        object->acceptRead(iqfb);
+
+        std::string s = columnLabels.str();
+        s.erase(s.end() - 1); // remove last comma
+
+        sql << "(" << s << ")";
+
+        s = fieldPlaceholders.str();
+        s.erase(s.end() - 1);
+
+        sql << " VALUES (" << s << ");";
+
+        return sql.str();
+    }
+
+    std::string updateStatement() const
+    {
+        std::ostringstream sql;
+        sql << "UPDATE " << object->metainfo.label << " SET ";
+
+        DbUpdateQueryFieldBuilder uqfb(sql);
+        object->acceptRead(uqfb);
+
+        long pos = sql.tellp();
+        sql.seekp(pos - 1); // remove last comma
+
+        sql << " WHERE id = ?;";
+
+        return sql.str();
     }
 
     void save()
     {
-        /*
+        // TODO: dirty status tracking
+        // if _not_dirty: return
+        PreparedStatement::ptr statement;
+        bool update = object->id > 0;
 
-        // FIXME: primary key < 1 ? INSERT : UPDATE
-
-        if (!_save_statement) {
-            std::ostringstream sql;
-            sql << "INSERT INTO " << object->metainfo.label;
-
-            std::ostringstream columns;
-            std::ostringstream fieldPlaceholders;
-
-            DbInsertQueryBuilder qb(columns, fieldPlaceholders);
-            object->acceptRead(qb);
-
-            std::string s = columns.str();
-            s.erase(ret.end() - 1); // remove last comma
-
-            sql << "(" << s << ")";
-
-            s = fieldPlaceholders.str();
-            s.erase(ret.end() - 1);
-
-            sql << "values (" << s << ")";
-
-            _save_statement.reset(PreparedStatementFactory::create());
+        if (update) {
+            prepareUpdateStatement();
+            statement = _update_statement;
+        } else {
+            // insert
+            prepareInsertStatement();
+            statement = _insert_statement;
         }
 
-        DbFieldBinder fb(_save_statement);
+        DbFieldBinder fb(statement);
         object->acceptRead(fb);
 
-        _save_statement->executeUpdate();
+        if (update)
+            // update needs to to have id bound as well
+            fb << object->id;
 
-        */
+        int howmany = statement->executeUpdate();
+        if (howmany != 1) {
+            std::ostringstream msg;
+            msg << "PreparedStatement::executeUpdate() returned "
+                << howmany << "instead of 1";
+            throw DbException(msg.str(), __FUNCTION__); // , statement);
+        }
+
+        if (!update)
+            // insert needs to set the object id after insert
+
+            // NOTE: the result of this call is unpredictable
+            // if a separate thread performs a new INSERT on
+            // the same database connection while getLastInsertId()
+            // is executing.
+            object->id = statement->getLastInsertId();
     }
 
 private:
-    // TODO: caching statements may be problematic in embedded environments
+    // TODO: caching so many statements may be problematic
+    // in embedded environments
     // (well, at least they are lazy-loaded)
-    PreparedStatement::ptr _save_statement;
+    PreparedStatement::ptr _insert_statement;
+    PreparedStatement::ptr _update_statement;
     PreparedStatement::ptr _load_statement;
+
+    inline void prepareInsertStatement()
+    {
+        /*
+        if (!_insert_statement)
+            _insert_statement.reset(
+                    PreparedStatementFactory::create(insertStatement()));
+        */
+    }
+
+    inline void prepareUpdateStatement()
+    {
+        /*
+        if (!_update_statement)
+            _insert_statement.reset(
+                    PreparedStatementFactory::create(updateStatement()));
+        */
+    }
 };
 
 }

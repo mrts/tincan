@@ -1,13 +1,12 @@
-#include "tincan/DbObject.h"
-#include "tincan/Field.h"
-#include "tincan/release_assert.h"
+#ifndef DBFIELDTYPE_H__
+#define DBFIELDTYPE_H__
+
+#include "../release_assert.h"
+
+#include <string>
 
 namespace tincan
 {
-
-// TODO: SQL is SQLite-specific, refactor if other backends required
-
-// FIXME: options have no effect currently
 
 template <typename T>
 const std::string& DbFieldType(int)
@@ -37,3 +36,5 @@ const std::string& DbFieldType<int>(int fieldOptions)
 }
 
 }
+
+#endif /* DBFIELDTYPE_H */

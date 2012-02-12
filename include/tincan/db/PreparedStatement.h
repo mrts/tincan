@@ -1,8 +1,7 @@
 #ifndef PREPAREDSTATEMENT_H__
 #define PREPAREDSTATEMENT_H__
 
-#include "exceptions.h"
-#include "declarations.h"
+#include "../declarations.h"
 
 // don't depend on boost when using C++11
 #if defined(__GXX_EXPERIMENTAL_CXX0X__) || (__cplusplus > 199711L)
@@ -23,7 +22,7 @@ class RecordSet;
  * This object can then be used to efficiently execute this statement multiple
  * times.
  *
- * @throw SQLException
+ * @throw DbException
  */
 class PreparedStatement
 {
@@ -42,14 +41,14 @@ public:
      *
      * Supports int, double and std::string as of now.
      *
-     * @throw SQLException
+     * @throw DbException
      */
     template<typename T>
 	void bind(int parameterIndex, const T& val);
 
     /** Bind null to the prepared statement.
      *
-     * @throw SQLException
+     * @throw DbException
      */
 	virtual void bindNull(int parameterIndex) = 0;
 
@@ -59,13 +58,13 @@ public:
      * Contrary to the intuition of many, any bound variables retain their
      * values.
      *
-     * @throw SQLException
+     * @throw DbException
      */
     virtual void reset() = 0;
 
     /** Clear all bound parameters.
      *
-     * @throw SQLException
+     * @throw DbException
      */
     virtual void clear() = 0;
 
@@ -75,7 +74,7 @@ public:
      * @return RecordSet object that contains the data produced
      * by the query; never null
      *
-     * @throw SQLException
+     * @throw DbException
      */
     virtual recordset_ptr executeQuery() = 0;
 
@@ -84,9 +83,25 @@ public:
      * @return either (1) the row count for DML statements or (2) 0 for
      * statements that return nothing
      *
-     * @throw SQLException
+     * @throw DbException
      */
     virtual int executeUpdate() = 0;
+
+    // FIXME: this should be a 64-bit type really
+    // FIXME: information is SQLite-specific
+    /** Return the row id of the most recent successful INSERT into the
+     * active database. If the insert was made to a table that has a column
+     * of type INTEGER PRIMARY KEY then the last value from that column is
+     * used, otherwise the internal rowid value .
+     *
+     * @return last insert row id
+     *
+     * @throw DbException
+     */
+    virtual int getLastInsertId() = 0;
+
+    /** Get the underlying SQL statement. */
+    virtual const std::string& getSQL() const = 0;
 };
 
 class PreparedStatementFactory

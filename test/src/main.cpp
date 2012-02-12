@@ -79,12 +79,16 @@ int main()
 
         // DbObject-specific aspect: SQL statement building
         std::cout << ervin.createTableStatement() << std::endl;
+        std::cout << ervin.insertStatement() << std::endl;
+        std::cout << ervin.updateStatement() << std::endl;
 
         // DbObject-specific aspect: create the database table
         // ervin.createTable();
 
         // DbObject-specific aspect: store object in database
+        // std::cout << ervin->id.label << ": " ervin->id << std::endl;
         // ervin.save();
+        // std::cout << ervin->id.label << ": " ervin->id << std::endl;
 
     } catch (const std::exception& e) {
 
