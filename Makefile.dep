@@ -1,9 +1,13 @@
 obj/DbException.o: src/DbException.cpp include/tincan/DbException.h \
- include/tincan/db/PreparedStatement.h \
- include/tincan/db/../declarations.h
-obj/main.o: test/src/main.cpp include/tincan/tincan.h include/tincan/Field.h \
- include/tincan/Metainfo.h include/tincan/disable_copy.h \
- include/tincan/DbObject.h include/tincan/db/FieldVisitors.h \
- include/tincan/db/PreparedStatement.h \
- include/tincan/db/../declarations.h include/tincan/db/../disable_copy.h \
- include/tincan/db/PreparedStatement.h
+  include/tincan/db/PreparedStatement.h \
+  include/tincan/db/../declarations.h
+obj/main.o: test/src/main.cpp test/testcpp/include/testcpp/testcpp.h \
+  test/testcpp/include/testcpp/detail/general/scoped_pointer.h \
+  test/testcpp/include/testcpp/detail/general/release_assert.h \
+  test/testcpp/include/testcpp/detail/general/declarations.h \
+  include/tincan/tincan.h include/tincan/Field.h \
+  include/tincan/Metainfo.h include/tincan/disable_copy.h \
+  include/tincan/DbObject.h include/tincan/db/FieldVisitors.h \
+  include/tincan/db/DbFieldType.h include/tincan/db/../release_assert.h \
+  include/tincan/db/PreparedStatement.h \
+  include/tincan/db/../declarations.h

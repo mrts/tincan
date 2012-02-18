@@ -1,5 +1,5 @@
-tincan: a C++ data mapper
-=========================
+tincan: a C++ object mapper
+===========================
 
 At the core of ``tincan`` is a simple generic framework of fields and metadata
 for mapping objects to other data formats.
@@ -10,7 +10,7 @@ On top of that, ``tincan`` provides:
 
 * the XML aspect: serialization to/from XML.
 
-``tincan`` is `licenced`_ under the new BSD licence - feel free to modify and
+``tincan`` is `licenced under the MIT licence`_ - feel free to modify and
 use it commercially.
 
 Quick overview::
@@ -42,5 +42,5 @@ Quick overview::
 
 See `main test`_ for more details.
 
-.. _licenced: https://github.com/mrts/tincan/blob/master/LICENCE.rst
+.. _`licenced under the MIT licence`: https://github.com/mrts/tincan/blob/master/LICENCE.rst
 .. _main test: https://github.com/mrts/tincan/blob/master/test/src/main.cpp

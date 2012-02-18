@@ -2,8 +2,6 @@ LIBNAME  = tincan
 
 # General variables
 
-TEST     = tincan-test
-
 TARGET   = lib/lib$(LIBNAME).a
 
 DEBUG    =
@@ -13,9 +11,14 @@ CXX      = $(COMPILER)
 CXXFLAGS = -pipe -O2 $(DEBUG) -fPIC -Wall -Wextra -Werror -D_REENTRANT
 INCPATH  = -Iinclude
 
+TEST        = tincan-test
+TESTCPPDIR  = test/testcpp
+TESTCPPLIB  = $(TESTCPPDIR)/lib/libtestcpp.a
+TESTINCPATH = $(INCPATH) -I$(TESTCPPDIR)/include
+
 LINK     = $(COMPILER)
 LFLAGS   = -Wl,-O1
-LIBS     = -Llib -l$(LIBNAME)
+LIBS     = -Llib -l$(LIBNAME) -L$(TESTCPPDIR)/lib -ltestcpp
 
 AR       = ar cqs
 
@@ -42,9 +45,12 @@ $(TARGET): $(OBJS)
 
 test/obj/%.o: test/src/%.cpp
 	mkdir -p test/obj
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $@ $<
+	$(CXX) -c $(CXXFLAGS) $(TESTINCPATH) -o $@ $<
 
-$(TEST): $(TARGET) $(TESTOBJS)
+$(TESTCPPLIB): $(TESTCPPDIR)/Makefile
+	cd $(TESTCPPDIR); make
+
+$(TEST): $(TARGET) $(TESTOBJS) $(TESTCPPLIB)
 	$(LINK) $(LFLAGS) -o $@ $(TESTOBJS) $(LIBS)
 
 test: $(TEST)
@@ -56,6 +62,6 @@ clean:
 # Automatic dependency handling
 
 dep: $(SRC) $(TESTSRC)
-	$(CXX) $(INCPATH) -MM $(SRC) $(TESTSRC) | sed 's%^\([[:alpha:]]\)%obj/\1%' > $(DEP)
+	$(CXX) $(TESTINCPATH) -MM $(SRC) $(TESTSRC) | sed 's%^\([[:alpha:]]\)%obj/\1%' > $(DEP)
 
 include $(DEP)

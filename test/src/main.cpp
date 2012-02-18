@@ -1,3 +1,5 @@
+#include <testcpp/testcpp.h>
+
 #include <tincan/tincan.h>
 
 #include <string>
@@ -79,8 +81,20 @@ int main()
 
         // DbObject-specific aspect: SQL statement building
         std::cout << ervin.createTableStatement() << std::endl;
+
         std::cout << ervin.insertStatement() << std::endl;
         std::cout << ervin.updateStatement() << std::endl;
+
+        Test::assertEqual<std::string>("create table statement",
+                ervin.createTableStatement(),
+                "CREATE TABLE person "
+                "(id INTEGER PRIMARY KEY AUTOINCREMENT,name TEXT,age INT);");
+        Test::assertEqual<std::string>("insert statement",
+                ervin.insertStatement(),
+                "INSERT INTO person (name,age) VALUES (?,?);");
+        Test::assertEqual<std::string>("update statement",
+                ervin.updateStatement(),
+                "UPDATE person SET name = ?,age = ? WHERE id = ?;");
 
         // DbObject-specific aspect: create the database table
         // ervin.createTable();
@@ -93,6 +107,7 @@ int main()
     } catch (const std::exception& e) {
 
         std::cerr << e.what() << std::endl;
+        return 1;
 
     }
 

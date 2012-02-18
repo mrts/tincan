@@ -1,0 +1,3 @@
+[submodule "test/testcpp"]
+	path = test/testcpp
+	url = git://github.com/mrts/testcpp.git
