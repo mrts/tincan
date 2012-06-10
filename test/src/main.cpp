@@ -67,8 +67,9 @@ int main()
         // DB connection is a singleton and needs to be configured before use
         // Currently SQLite-specific, but ready for other backends too with
         // little refactoring
+        // tincan::DbConnection::connect("SQLITE", "test.db");
         // tincan::DbConnection& db = tincan::DbConnection::instance();
-        // db.connect("test.db");
+        // db.connect("SQLITE", "test.db");
 
         tincan::DbObject<Person> ervin(new Person("Ervin", 38));
 

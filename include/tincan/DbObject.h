@@ -2,7 +2,9 @@
 #define DATAOBJECT_H__
 
 #include "db/FieldVisitors.h"
-#include "db/PreparedStatement.h"
+#include "dbccpp/PreparedStatement.h"
+
+#include "detail/stream_exceptions.h"
 
 // don't depend on boost when using C++11
 #if defined(__GXX_EXPERIMENTAL_CXX0X__) || (__cplusplus > 199711L)
@@ -69,10 +71,14 @@ public:
     std::string insertStatement() const
     {
         std::ostringstream sql;
+        ENABLE_EXCEPTIONS(sql);
+
         sql << "INSERT INTO " << object->metainfo.label << " ";
 
         std::ostringstream columnLabels;
+        ENABLE_EXCEPTIONS(columnLabels);
         std::ostringstream fieldPlaceholders;
+        ENABLE_EXCEPTIONS(fieldPlaceholders);
 
         DbInsertQueryFieldBuilder iqfb(columnLabels, fieldPlaceholders);
         object->acceptRead(iqfb);
@@ -93,6 +99,7 @@ public:
     std::string updateStatement() const
     {
         std::ostringstream sql;
+        ENABLE_EXCEPTIONS(sql);
         sql << "UPDATE " << object->metainfo.label << " SET ";
 
         DbUpdateQueryFieldBuilder uqfb(sql);
@@ -110,7 +117,7 @@ public:
     {
         // TODO: dirty status tracking
         // if _not_dirty: return
-        PreparedStatement::ptr statement;
+        dbc::PreparedStatement::ptr statement;
         bool update = object->id > 0;
 
         if (update) {
@@ -137,7 +144,7 @@ public:
             throw DbException(msg.str(), __FUNCTION__); // , statement);
         }
 
-        if (!update)
+        if (!update) {
             // insert needs to set the object id after insert
 
             // NOTE: the result of this call is unpredictable
@@ -145,21 +152,23 @@ public:
             // the same database connection while getLastInsertId()
             // is executing.
             object->id = statement->getLastInsertId();
+        }
     }
 
 private:
     // TODO: caching so many statements may be problematic
     // in embedded environments
     // (well, at least they are lazy-loaded)
-    PreparedStatement::ptr _insert_statement;
-    PreparedStatement::ptr _update_statement;
-    PreparedStatement::ptr _load_statement;
+    dbc::PreparedStatement::ptr _insert_statement;
+    dbc::PreparedStatement::ptr _update_statement;
+    dbc::PreparedStatement::ptr _load_statement;
 
     inline void prepareInsertStatement()
     {
         /*
         if (!_insert_statement)
             _insert_statement.reset(
+                    PreparedStatement::create(insertStatement());
                     PreparedStatementFactory::create(insertStatement()));
         */
     }

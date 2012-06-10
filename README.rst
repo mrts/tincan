@@ -10,9 +10,36 @@ On top of that, ``tincan`` provides:
 
 * the XML aspect: serialization to/from XML.
 
+``tincan`` depends on `dbc-cpp`_.
+
+**Development status**: development/unstable.
+
 ``tincan`` is `licenced under the MIT licence`_ - feel free to modify and
 use it commercially.
 
+**Be sure to pull in submodules** with ``git clone --recursive`` (see below
+under **Building**).
+
+Building
+--------
+
+Build and test ``tincan`` as follows (``clang++`` is the default compiler)::
+
+  git clone --recursive git://github.com/mrts/tincan.git
+
+  cd tincan
+
+  make -j 4
+  make test
+
+Includes are in ``include`` and the library will be in ``lib/tincan``.
+
+Add ``-I$(TINCANDIR)/include -I$(TINCANDIR)/lib/dbccpp/include`` to include
+path and ``-L$(TINCANDIR)/lib/{tincan,dbccpp} -ltincan -ldbccpp -lsqlite3`` to
+linker flags in your project's ``Makefile``.
+
+Usage
+-----
 Quick overview::
 
  tincan::DbObject<Person> ervin(new Person("Ervin", 38));
@@ -43,4 +70,5 @@ Quick overview::
 See `main test`_ for more details.
 
 .. _`licenced under the MIT licence`: https://github.com/mrts/tincan/blob/master/LICENCE.rst
-.. _main test: https://github.com/mrts/tincan/blob/master/test/src/main.cpp
+.. _main test: http://github.com/mrts/tincan/blob/master/test/src/main.cpp
+.. _dbc-cpp: http://github.com/mrts/dbc-cpp/

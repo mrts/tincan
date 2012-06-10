@@ -2,7 +2,7 @@
 #define FIELDBUILDERS_H__
 
 #include "DbFieldType.h"
-#include "PreparedStatement.h"
+#include "dbccpp/PreparedStatement.h"
 
 #include "../disable_copy.h"
 
@@ -78,7 +78,7 @@ private:
 class DbFieldBinder
 {
 public:
-    DbFieldBinder(PreparedStatement::ptr& statement) :
+    DbFieldBinder(dbc::PreparedStatement::ptr& statement) :
         _statement(statement),
         _counter(1)
     {}
@@ -86,14 +86,14 @@ public:
     template <class TypedField>
     void operator<< (const TypedField& field)
     {
-        _statement->bind<typename TypedField::type>(_counter, field.value());
+        _statement->set<typename TypedField::type>(_counter, field.value());
         _counter++;
     }
 
 private:
     DISABLE_COPY(DbFieldBinder)
 
-    PreparedStatement::ptr& _statement;
+    dbc::PreparedStatement::ptr& _statement;
     unsigned int _counter;
 };
 

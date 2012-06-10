@@ -19,7 +19,7 @@ COMPILER = clang++ # g++
 
 CXX      = $(COMPILER)
 CXXFLAGS = -pipe $(OPTIMIZE) -fPIC -Wall -Wextra -Werror -D_REENTRANT
-INCPATH  = -Iinclude -I$(DBCPPINCPATH)
+INCPATH  = -Iinclude $(DBCPPINCPATH)
 
 TEST        = tincan-test
 TESTCPPDIR  = test/testcpp
