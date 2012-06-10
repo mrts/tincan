@@ -1,9 +1,15 @@
 LIBNAME  = tincan
 
-# General variables
-
 TARGETLIBDIR = lib/$(LIBNAME)
 TARGETLIB    = $(TARGETLIBDIR)/lib$(LIBNAME).a
+TINCANLIBS   = -L$(TARGETLIBDIR) -l$(LIBNAME)
+
+# Dependency on dbc-cpp
+
+DBCCPPDIR    = lib/dbccpp
+DBCCPPLIB    = $(DBCCPPDIR)/lib/libdbccpp.a
+DBCPPINCPATH = -I$(DBCCPPDIR)/include
+DBCCPPLIBS   = -L$(DBCCPPDIR)/lib -ldbccpp -lsqlite3
 
 # For building with clang++ 3.1 in Ubuntu 12.04, install system clang and
 # add -I/usr/include/clang/3.0/include to compile flags
@@ -13,16 +19,17 @@ COMPILER = clang++ # g++
 
 CXX      = $(COMPILER)
 CXXFLAGS = -pipe $(OPTIMIZE) -fPIC -Wall -Wextra -Werror -D_REENTRANT
-INCPATH  = -Iinclude
+INCPATH  = -Iinclude -I$(DBCPPINCPATH)
 
 TEST        = tincan-test
 TESTCPPDIR  = test/testcpp
 TESTCPPLIB  = $(TESTCPPDIR)/lib/libtestcpp.a
 TESTINCPATH = $(INCPATH) -I$(TESTCPPDIR)/include
+TESTCPPLIBS = -L$(TESTCPPDIR)/lib -ltestcpp
 
 LINK     = $(COMPILER)
 LFLAGS   = -Wl,-O1
-LIBS     = -L$(TARGETLIBDIR) -l$(LIBNAME) -L$(TESTCPPDIR)/lib -ltestcpp
+LIBS     = $(TINCANLIBS) $(TESTCPPLIBS) $(DBCCPPLIBS)
 
 AR       = ar cqs
 
@@ -54,10 +61,13 @@ test/obj/%.o: test/src/%.cpp
 	mkdir -p test/obj
 	$(CXX) -c $(CXXFLAGS) $(TESTINCPATH) -o $@ $<
 
-$(TESTCPPLIB): $(TESTCPPDIR)/Makefile
-	cd $(TESTCPPDIR); make
+$(DBCCPPLIB): $(DBCCPPDIR)/Makefile
+	cd $(DBCCPPDIR); make -j 4
 
-$(TEST): $(TARGETLIB) $(TESTOBJS) $(TESTCPPLIB)
+$(TESTCPPLIB): $(TESTCPPDIR)/Makefile
+	cd $(TESTCPPDIR); make -j 4
+
+$(TEST): $(TARGETLIB) $(DBCCPPLIB) $(TESTCPPLIB) $(TESTOBJS)
 	$(LINK) $(LFLAGS) -o $@ $(TESTOBJS) $(LIBS)
 
 test: $(TEST)

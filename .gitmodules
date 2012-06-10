@@ -1,3 +1,6 @@
 [submodule "test/testcpp"]
 	path = test/testcpp
 	url = git://github.com/mrts/test-cpp.git
+[submodule "lib/dbccpp"]
+	path = lib/dbccpp
+	url = git://github.com/mrts/dbc-cpp.git
