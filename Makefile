@@ -14,7 +14,7 @@ DBCCPPLIBS   = -L$(DBCCPPDIR)/lib -ldbccpp -lsqlite3
 # For building with clang++ 3.1 in Ubuntu 12.04, install system clang and
 # add -I/usr/include/clang/3.0/include to compile flags
 
-OPTIMIZE = -O2 # -g -std=c++0x | -std=c++11
+OPTIMIZE = -O2 -g # -std=c++0x | -std=c++11
 COMPILER = clang++ # g++
 
 CXX      = $(COMPILER)
@@ -49,17 +49,17 @@ TESTOBJS = $(patsubst test/src/%.cpp, test/obj/%.o, $(TESTSRC))
 # Targets
 
 obj/%.o: src/%.cpp
-	mkdir -p obj/{db,xml}
+	mkdir -p obj/db obj/xml
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $@ $<
+
+test/obj/%.o: test/src/%.cpp
+	mkdir -p test/obj
+	$(CXX) -c $(CXXFLAGS) $(TESTINCPATH) -o $@ $<
 
 $(TARGETLIB): $(OBJS)
 	mkdir -p $(TARGETLIBDIR)
 	rm -f $@
 	$(AR) $@ $(OBJS)
-
-test/obj/%.o: test/src/%.cpp
-	mkdir -p test/obj
-	$(CXX) -c $(CXXFLAGS) $(TESTINCPATH) -o $@ $<
 
 $(DBCCPPLIB): $(DBCCPPDIR)/Makefile
 	cd $(DBCCPPDIR); make -j 4

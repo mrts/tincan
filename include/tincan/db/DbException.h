@@ -3,8 +3,9 @@
 
 #include <stdexcept>
 #include <string>
+#include <sstream>
 
-namespace dbc { class PreparedStatement; }
+#include <dbccpp/PreparedStatement.h>
 
 namespace tincan
 {
@@ -18,8 +19,16 @@ public:
     {}
 
 private:
-    std::string buildMessage(const std::string& msg, const char* function,
-            const dbc::PreparedStatement& statement);
+    inline std::string buildMessage(const std::string& msg,
+            const char* function,
+            const dbc::PreparedStatement& statement)
+    {
+        std::ostringstream ss;
+        ss << msg << " in " << function
+            << ". SQL statement: " << statement.getSQL();
+
+        return ss.str();
+    }
 };
 
 }

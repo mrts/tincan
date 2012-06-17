@@ -1,3 +1,5 @@
+#include "Person.h"
+
 #include <testcpp/testcpp.h>
 
 #include <tincan/tincan.h>
@@ -7,109 +9,77 @@
 #include <iostream>
 #include <exception>
 
-struct Person
+void example()
 {
-    Person(const std::string& n, int a) :
-        id(-1),
-        name(n),
-        age(a)
-    {}
+    using namespace tincan;
 
-    // TODO:
-    //  namespaces  - tincan::Namespace<TRIP>
-    //  combined constraints - unique together etc
-    //  in some far future - inheritance
-    static const char PERSON_CLASS[];
-    static tincan::Metainfo<PERSON_CLASS> metainfo;
+    // need to connect to a database before using DbObjects
+    dbc::DbConnection::connect("sqlite", "test.db");
 
-    static const char ID_FIELD[];
-    /** id is a special "primary key" field that must be present for the db
-     * ascpect. (You get a compile error when using DbObject if it is not.)
-     * It shouldn't be passed to visitors as it is accessed directly.
-     */
-    tincan::Field<int, ID_FIELD, tincan::FieldOptions::PrimaryKey> id;
+    // always use make_shared() when creating shared pointers
+    DbObject<Person> ervin(stdutil::make_shared<Person>("Ervin", 38));
 
-    static const char NAME_FIELD[];
-    tincan::Field<std::string, NAME_FIELD> name;
+    // slight inconvenience - an object is needed for creating database tables
+    ervin.createTable();
 
-    static const char AGE_FIELD[];
-    tincan::Field<int, AGE_FIELD> age;
+    // fields provide metadata for and proxy the underlying type
+    std::cout << ervin->id.label  << ": " << ervin->id << ", ";
+    std::cout << ervin->name.label << ": " << ervin->name << ", ";
+    std::cout << ervin->age.label  << ": " << ervin->age << std::endl;
 
-    /** Let generic visitors read fields. */
-    template <class Visitor>
-    void acceptRead(Visitor& v)
-    {
-        v << name;
-        v << age;
-    }
+    ervin->age = 39;
+    std::cout << ervin->age.label  << ": " << ervin->age << std::endl;
 
-    /** Let generic visitors write fields. */
-    template <class Visitor>
-    void acceptWrite(Visitor& v)
-    {
-        v >> name;
-        v >> age;
-    }
-};
+    ervin.save();
+    std::cout << ervin->id.label  << ": " << ervin->id << std::endl;
 
-// metainfo definition
-const char Person::PERSON_CLASS[] = "person";
-tincan::Metainfo<Person::PERSON_CLASS> Person::metainfo;
+    /*
+    DbObject<Person> p1 =
+        DbObject<Person>::loadById(1);
 
-// field names definitions
-const char Person::ID_FIELD[] = "id";
-const char Person::NAME_FIELD[] = "name";
-const char Person::AGE_FIELD[] = "age";
+    std::cout << p1->name.label << ": " << p1->name << std::endl;
+
+    DbObject<Person> p2 =
+        DbObject<Person>::loadByField<std::string>("name", "Ervin");
+
+    std::cout << p2->name.label << ": " << p2->name << std::endl;
+    */
+
+    // TODO: loading collections
+}
 
 int main()
 {
-    try {
-        // DB connection is a singleton and needs to be configured before use
-        // Currently SQLite-specific, but ready for other backends too with
-        // little refactoring
-        // tincan::DbConnection::connect("SQLITE", "test.db");
-        // tincan::DbConnection& db = tincan::DbConnection::instance();
-        // db.connect("SQLITE", "test.db");
+    try
+    {
+        example();
 
-        tincan::DbObject<Person> ervin(new Person("Ervin", 38));
-
-        // fields provide metadata for and proxy the underlying type
-        std::cout << ervin->name.label << ": " << ervin->name << ", ";
-        std::cout << ervin->age.label  << ": " << ervin->age << std::endl;
-
-        ervin->age = 39;
-        std::cout << ervin->age.label  << ": " << ervin->age << std::endl;
-
-        // DbObject-specific aspect: SQL statement building
-        std::cout << ervin.createTableStatement() << std::endl;
-
-        std::cout << ervin.insertStatement() << std::endl;
-        std::cout << ervin.updateStatement() << std::endl;
+        /*
+         * TODO: create a proper test suite ASAP
+         *
+        Test::assertEqual<std::string>("field labels work", ...);
+        Test::assertEqual<std::string>("field values work", ...);
+        Test::assertEqual<std::string>("changing fields works", ...);
 
         Test::assertEqual<std::string>("create table statement",
                 ervin.createTableStatement(),
                 "CREATE TABLE person "
                 "(id INTEGER PRIMARY KEY AUTOINCREMENT,name TEXT,age INT);");
+
         Test::assertEqual<std::string>("insert statement",
                 ervin.insertStatement(),
                 "INSERT INTO person (name,age) VALUES (?,?);");
+
         Test::assertEqual<std::string>("update statement",
                 ervin.updateStatement(),
                 "UPDATE person SET name = ?,age = ? WHERE id = ?;");
+        */
 
-        // DbObject-specific aspect: create the database table
-        // ervin.createTable();
-
-        // DbObject-specific aspect: store object in database
-        // std::cout << ervin->id.label << ": " ervin->id << std::endl;
-        // ervin.save();
-        // std::cout << ervin->id.label << ": " ervin->id << std::endl;
-
-    } catch (const std::exception& e) {
-
-        std::cerr << e.what() << std::endl;
+    }
+    catch (const std::exception& e)
+    {
+        std::cerr << "EXCEPTION OCCURED: " << e.what() << std::endl;
         return 1;
-
     }
 
     return 0;

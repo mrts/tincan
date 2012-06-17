@@ -1,1 +1,18 @@
-obj/DbException.o: src/DbException.cpp include/tincan/DbException.h
+test/obj/main.o: test/src/main.cpp test/src/Person.h include/tincan/Metainfo.h \
+  include/tincan/disable_copy.h include/tincan/Field.h \
+  test/testcpp/include/testcpp/testcpp.h \
+  lib/dbccpp/include/utilcpp/declarations.h \
+  lib/dbccpp/include/utilcpp/scoped_ptr.h \
+  lib/dbccpp/include/utilcpp/release_assert.h \
+  lib/dbccpp/include/utilcpp/disable_copy.h \
+  test/testcpp/include/testcpp/assert_impl.h include/tincan/tincan.h \
+  include/tincan/DbObject.h include/tincan/db/FieldVisitors.h \
+  include/tincan/db/DbFieldType.h include/tincan/db/../release_assert.h \
+  lib/dbccpp/include/dbccpp/PreparedStatement.h \
+  lib/dbccpp/include/dbccpp/ResultSet.h \
+  lib/dbccpp/include/dbccpp/DbExceptions.h \
+  lib/dbccpp/include/dbccpp/CountProxy.h include/tincan/db/DbException.h \
+  lib/dbccpp/include/dbccpp/DbConnection.h \
+  include/tincan/detail/stream_exceptions.h
+test/obj/Person.o: test/src/Person.cpp test/src/Person.h include/tincan/Metainfo.h \
+  include/tincan/disable_copy.h include/tincan/Field.h
