@@ -32,7 +32,7 @@ struct Field
     std::string label;
     int options;
 
-    Field(const T& value) :
+    Field(const T& value = T()) :
         label(lbl),
         options(opts),
         _value(value)

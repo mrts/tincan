@@ -5,7 +5,6 @@
 #include <tincan/tincan.h>
 
 #include <string>
-#include <vector>
 #include <iostream>
 #include <exception>
 
@@ -33,19 +32,35 @@ void example()
     ervin.save();
     std::cout << ervin->id.label  << ": " << ervin->id << std::endl;
 
-    /*
-    DbObject<Person> p1 =
-        DbObject<Person>::loadById(1);
+    DbObject<Person> marvin(stdutil::make_shared<Person>("Marvin", 42));
+    marvin.save();
 
-    std::cout << p1->name.label << ": " << p1->name << std::endl;
+    DbObject<Person> p;
 
-    DbObject<Person> p2 =
-        DbObject<Person>::loadByField<std::string>("name", "Ervin");
+    p.loadById(1);
 
-    std::cout << p2->name.label << ": " << p2->name << std::endl;
-    */
+    std::cout << p->name.label << ": " << p->name << std::endl;
+
+    // true = allow many results, first is picked arbitrarily
+    p.loadByField<std::string>("name", "Ervin", true);
+
+    std::cout << p->name.label << ": " << p->name << std::endl;
+
+    dbc::PreparedStatement::ptr statement =
+        dbc::DbConnection::instance().prepareStatement("SELECT * FROM person");
+
+    p.loadByQuery(statement, true);
+
+    std::cout << p->name.label << ": " << p->name << std::endl;
 
     // TODO: loading collections
+    /*
+    std::vector<DbObject<Person> > persons =
+        DbObject<Person>::loadManyByField<std::string>("name", "%vin");
+
+    std::vector<DbObject<Person> > persons =
+        DbObject<Person>::loadManyByQuery(...);
+    */
 }
 
 int main()

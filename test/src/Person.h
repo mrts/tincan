@@ -13,7 +13,7 @@
 
 struct Person
 {
-    Person(const std::string& n, int a) :
+    Person(const std::string& n = "", int a = 0) :
         id(-1),
         name(n),
         age(a)
@@ -45,7 +45,7 @@ struct Person
 
     /** Let generic visitors write fields. */
     template <class Visitor>
-    void acceptWrite(const Visitor& v)
+    void acceptWrite(Visitor& v)
     {
         v >> name;
         v >> age;

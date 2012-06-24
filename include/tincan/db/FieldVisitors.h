@@ -2,7 +2,8 @@
 #define FIELDBUILDERS_H__
 
 #include "DbFieldType.h"
-#include "dbccpp/PreparedStatement.h"
+#include <dbccpp/PreparedStatement.h>
+#include <dbccpp/ResultSet.h>
 
 #include "../disable_copy.h"
 
@@ -94,6 +95,29 @@ private:
     DISABLE_COPY(DbFieldBinder)
 
     dbc::PreparedStatement::ptr& _statement;
+    unsigned int _counter;
+};
+
+class ObjectFieldBinder
+{
+public:
+    ObjectFieldBinder(const dbc::ResultSet::ptr& result) :
+        _result(result),
+        // index is 0-based, skip id, which is already set
+        _counter(1)
+    {}
+
+    template <class TypedField>
+    void operator>> (TypedField& field)
+    {
+        field = _result->get<typename TypedField::type>(_counter);
+        _counter++;
+    }
+
+private:
+    DISABLE_COPY(ObjectFieldBinder)
+
+    const dbc::ResultSet::ptr& _result;
     unsigned int _counter;
 };
 
