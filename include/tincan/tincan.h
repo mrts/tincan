@@ -9,6 +9,6 @@
 #include "DbObject.h"
 
 // XML aspect
-// #include "XmlObject.h"
+#include "XmlObject.h"
 
 #endif /* TINCAN_H */
