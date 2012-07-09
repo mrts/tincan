@@ -21,6 +21,7 @@
 #endif
 
 #include <string>
+#include <vector>
 #include <sstream>
 
 namespace tincan
@@ -198,9 +199,7 @@ public:
 
         dbc::ResultSet::ptr result(_load_by_id_statement->executeQuery());
         result->next();
-
-        ObjectFieldBinder fieldbinder(result);
-        object->acceptWrite(fieldbinder);
+        bindFields(result, *this);
 
         if (result->next())
             throw DbException("More than one result for id", __FUNCTION__,
@@ -218,6 +217,20 @@ public:
         loadByQuery(statement, allowMany);
     }
 
+    template <typename FieldType>
+    static void loadManyByField(const std::string& field, FieldType value,
+            std::vector<DbObject<T> >& out)
+    {
+        // TODO: should we out.clear() first?
+        // TODO: accessing metainfo through temporary objects is unclean...
+        DbObject<T> tmp;
+        dbc::PreparedStatement::ptr statement = dbc::DbConnection::instance()
+                .prepareStatement(tmp.loadByFieldStatement(field));
+        statement->set<FieldType>(1, value);
+
+        loadManyByQuery(statement, out);
+    }
+
     // TODO: carefully consider the safety implications of taking
     // shared_ptrs by ref in a public API
     void loadByQuery(const dbc::PreparedStatement::ptr& statement,
@@ -225,14 +238,24 @@ public:
     {
         dbc::ResultSet::ptr result(statement->executeQuery());
         result->next();
-
-        object->id = result->get<int>(0);
-
-        ObjectFieldBinder fieldbinder(result);
-        object->acceptWrite(fieldbinder);
+        bindFields(result, *this);
 
         if (!allowMany && result->next())
             throw DbException("More than one result", __FUNCTION__, *statement);
+    }
+
+    static void loadManyByQuery(const dbc::PreparedStatement::ptr& statement,
+            std::vector<DbObject<T> >& out)
+    {
+        dbc::ResultSet::ptr result(statement->executeQuery());
+
+        while (result->next())
+        {
+            DbObject<T> obj;
+            bindFields(result, obj);
+
+            out.push_back(obj);
+        }
     }
 
 private:
@@ -264,6 +287,15 @@ private:
     {
         prepareStatement(_update_statement, &DbObject::updateStatement);
     }
+
+    inline static void bindFields(dbc::ResultSet::ptr& result, DbObject<T>& obj)
+    {
+        obj->id = result->get<int>(0);
+
+        ObjectFieldBinder fieldbinder(result);
+        obj->acceptWrite(fieldbinder);
+    }
+
 };
 
 template<typename T>

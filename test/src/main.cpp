@@ -7,8 +7,14 @@
 #include <string>
 #include <iostream>
 #include <exception>
+#include <vector>
 
-void example()
+void print_person(tincan::DbObject<Person>& obj)
+{
+    std::cout << obj->name << std::endl;
+}
+
+void db_example()
 {
     using namespace tincan;
 
@@ -41,7 +47,7 @@ void example()
 
     std::cout << p->name.label << ": " << p->name << std::endl;
 
-    // true = allow many results, first is picked arbitrarily
+    // true = allow many results, the first one is picked arbitrarily
     p.loadByField<std::string>("name", "Ervin", true);
 
     std::cout << p->name.label << ": " << p->name << std::endl;
@@ -53,7 +59,16 @@ void example()
 
     std::cout << p->name.label << ": " << p->name << std::endl;
 
-    // TODO: loading collections
+    std::vector<DbObject<Person> > persons;
+    DbObject<Person>::loadManyByQuery(statement, persons);
+
+    std::for_each(persons.begin(), persons.end(), print_person);
+
+    DbObject<Person>::loadManyByField<std::string>("name", "%vin", persons);
+
+    std::for_each(persons.begin(), persons.end(), print_person);
+
+    // TODO: add loading collections by return for RVO-aware compilers
     /*
     std::vector<DbObject<Person> > persons =
         DbObject<Person>::loadManyByField<std::string>("name", "%vin");
@@ -67,7 +82,8 @@ int main()
 {
     try
     {
-        example();
+        db_example();
+        // xml_example();
 
         /*
          * TODO: create a proper test suite ASAP
